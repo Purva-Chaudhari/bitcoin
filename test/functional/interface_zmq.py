@@ -119,6 +119,7 @@ class ZMQTest (BitcoinTestFramework):
             self.test_mempool_sync()
             self.test_reorg()
             self.test_multiple_interfaces()
+            import pdb; pdb.set_trace()
         finally:
             # Destroy the ZMQ context.
             self.log.debug("Destroying ZMQ context")
@@ -560,7 +561,7 @@ class ZMQTest (BitcoinTestFramework):
             ("hashblock", "tcp://127.0.0.1:28334"),
             ("hashblock", "tcp://127.0.0.1:28335"),
         ], sync_blocks=False)
-
+	
         # Generate 1 block in nodes[0] and receive all notifications
         self.nodes[0].generatetoaddress(1, ADDRESS_BCRT1_UNSPENDABLE)
 

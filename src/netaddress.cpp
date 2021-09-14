@@ -13,6 +13,7 @@
 #include <util/asmap.h>
 #include <util/strencodings.h>
 #include <util/string.h>
+#include <logging.h>
 
 #include <algorithm>
 #include <array>
@@ -28,21 +29,29 @@ CNetAddr::BIP155Network CNetAddr::GetBIP155Network() const
 {
     switch (m_net) {
     case NET_IPV4:
+    	LogPrintf("STEP8.1 debug\n");
         return BIP155Network::IPV4;
     case NET_IPV6:
+    	LogPrintf("STEP8.2 debug\n");
         return BIP155Network::IPV6;
     case NET_ONION:
+    	LogPrintf("STEP8.3 debug\n");
         return BIP155Network::TORV3;
     case NET_I2P:
+    	LogPrintf("STEP8.4 debug\n");
         return BIP155Network::I2P;
     case NET_CJDNS:
+    	LogPrintf("STEP8.5 debug\n");
         return BIP155Network::CJDNS;
     case NET_INTERNAL:   // should have been handled before calling this function
+    	LogPrintf("STEP8.6 debug\n");
     case NET_UNROUTABLE: // m_net is never and should not be set to NET_UNROUTABLE
+    	LogPrintf("STEP8.7 debug\n");
     case NET_MAX:        // m_net is never and should not be set to NET_MAX
+    	LogPrintf("STEP8.8 debug\n");
         assert(false);
     } // no default case, so the compiler can warn about missing cases
-
+    LogPrintf("STEP8.9 debug\n");
     assert(false);
 }
 
@@ -140,24 +149,29 @@ void CNetAddr::SetLegacyIPv6(Span<const uint8_t> ipv6)
     assert(ipv6.size() == ADDR_IPV6_SIZE);
 
     size_t skip{0};
+    LogPrintf("STAGE9 debug");
 
     if (HasPrefix(ipv6, IPV4_IN_IPV6_PREFIX)) {
         // IPv4-in-IPv6
+        LogPrintf("STAGE9.1 debug");
         m_net = NET_IPV4;
         skip = sizeof(IPV4_IN_IPV6_PREFIX);
     } else if (HasPrefix(ipv6, TORV2_IN_IPV6_PREFIX)) {
         // TORv2-in-IPv6 (unsupported). Unserialize as !IsValid(), thus ignoring them.
         // Mimic a default-constructed CNetAddr object which is !IsValid() and thus
         // will not be gossiped, but continue reading next addresses from the stream.
+        LogPrintf("STAGE9.2 debug");
         m_net = NET_IPV6;
         m_addr.assign(ADDR_IPV6_SIZE, 0x0);
         return;
     } else if (HasPrefix(ipv6, INTERNAL_IN_IPV6_PREFIX)) {
         // Internal-in-IPv6
+        LogPrintf("STAGE9.3 debug");
         m_net = NET_INTERNAL;
         skip = sizeof(INTERNAL_IN_IPV6_PREFIX);
     } else {
         // IPv6
+        LogPrintf("STAGE9.4 debug");
         m_net = NET_IPV6;
     }
 
@@ -317,7 +331,10 @@ bool CNetAddr::IsBindAny() const
 
 bool CNetAddr::IsIPv4() const { return m_net == NET_IPV4; }
 
-bool CNetAddr::IsIPv6() const { return m_net == NET_IPV6; }
+bool CNetAddr::IsIPv6() const { 
+if (m_net != NET_IPV6) 
+	LogPrintf("STAGE7 debug");
+return m_net == NET_IPV6; }
 
 bool CNetAddr::IsRFC1918() const
 {
@@ -451,26 +468,34 @@ bool CNetAddr::IsLocal() const
 bool CNetAddr::IsValid() const
 {
     // unspecified IPv6 address (::/128)
+    LogPrintf("STAGE6 debug\n");
     unsigned char ipNone6[16] = {};
     if (IsIPv6() && memcmp(m_addr.data(), ipNone6, sizeof(ipNone6)) == 0) {
+        LogPrintf("STAGE6.1 debug\n");
         return false;
     }
 
     // CJDNS addresses always start with 0xfc
     if (IsCJDNS() && (m_addr[0] != 0xFC)) {
+    	LogPrintf("STAGE6.2 debug\n");
         return false;
     }
 
     // documentation IPv6 address
-    if (IsRFC3849())
-        return false;
-
-    if (IsInternal())
-        return false;
+    if (IsRFC3849()){
+    	LogPrintf("STAGE6.3 debug\n");
+    	return false;
+    }
+        
+    if (IsInternal()){
+    	LogPrintf("STAGE6.4 debug\n");
+    	return false;
+    }
 
     if (IsIPv4()) {
         const uint32_t addr = ReadBE32(m_addr.data());
         if (addr == INADDR_ANY || addr == INADDR_NONE) {
+            LogPrintf("STAGE6.5 debug\n");
             return false;
         }
     }

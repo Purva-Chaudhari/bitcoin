@@ -196,6 +196,7 @@ class AddrTest(BitcoinTestFramework):
         assert_equal(full_outbound_peer.num_ipv4_received, 2)
         self.log.info('Check that addresses are not relayed to block-relay-only outbound peers')
         assert_equal(block_relay_peer.num_ipv4_received, 0)
+        import pdb; pdb.set_trace()
 
         self.nodes[0].disconnect_p2ps()
 

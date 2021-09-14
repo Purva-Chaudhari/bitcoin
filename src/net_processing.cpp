@@ -2606,6 +2606,8 @@ void PeerManagerImpl::ProcessMessage(CNode& pfrom, const std::string& msg_type, 
         LOCK(cs_main);
         UpdatePreferredDownload(pfrom, State(pfrom.GetId()));
         }
+        
+        LogPrintf("STAGE1 debug\n");
 
         // Self advertisement & GETADDR logic
         if (!pfrom.IsInboundConn() && SetupAddressRelay(pfrom, *peer)) {
@@ -2620,18 +2622,22 @@ void PeerManagerImpl::ProcessMessage(CNode& pfrom, const std::string& msg_type, 
             // We skip this for block-relay-only peers. We want to avoid
             // potentially leaking addr information and we do not want to
             // indicate to the peer that we will participate in addr relay.
+            LogPrintf("STAGE2 debug\n");
             if (fListen && !m_chainman.ActiveChainstate().IsInitialBlockDownload())
             {
+                LogPrintf("STAGE3 debug\n");
                 CAddress addr = GetLocalAddress(&pfrom.addr, pfrom.GetLocalServices());
                 FastRandomContext insecure_rand;
                 if (addr.IsRoutable())
                 {
                     LogPrint(BCLog::NET, "ProcessMessages: advertising address %s\n", addr.ToString());
                     PushAddress(*peer, addr, insecure_rand);
+                    LogPrintf("STAGE4 debug\n");
                 } else if (IsPeerAddrLocalGood(&pfrom)) {
                     addr.SetIP(addrMe);
                     LogPrint(BCLog::NET, "ProcessMessages: advertising address %s\n", addr.ToString());
                     PushAddress(*peer, addr, insecure_rand);
+                    LogPrintf("STAGE5 debug\n");
                 }
             }
 

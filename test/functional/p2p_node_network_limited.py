@@ -76,6 +76,7 @@ class NodeNetworkLimitedTest(BitcoinTestFramework):
         node1.send_message(msg_verack())
 
         node1.wait_for_addr()
+        import pdb; pdb.set_trace()
         #must relay address with NODE_NETWORK_LIMITED
         assert_equal(node1.firstAddrnServices, expected_services)
 
